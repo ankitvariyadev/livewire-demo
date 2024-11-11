@@ -38,25 +38,27 @@
             </thead>
             <tbody>
                 @foreach ($students as $student)
-                <tr class="bg-gray-100 text-center hover:bg-gray-200">
+                <tr wire:key="{{ $student->id }}" class="bg-gray-100 text-center hover:bg-gray-200">
                     <td class="p-3 border border-gray-300">{{ $student->id }}</td>
                     <td class="p-3 border border-gray-300">{{ $student->name }}</td>
                     <td class="p-3 border border-gray-300">{{ $student->email }}</td>
                     <td class="p-3 border border-gray-300">
-                        <button class="bg-yellow-500 text-white py-1 px-3 rounded mr-2" wire:click="edit({{ $student->id }})" @click="showModel = true">Edit</button>
-                        <button class="bg-red-600 text-white py-1 px-3 rounded" wire:click="delete({{ $student->id }})">Delete</button>
+                            <button class="bg-blue-500 text-white py-1 px-3 rounded mr-2" wire:click="edit({{ $student->id }})" @click="showModel = true">
+                                <svg class="w-4 h-4 mr-1" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12.293 3.707a1 1 0 0 1 1.414 0l5 5a1 1 0 0 1 0 1.414L7.707 19.707a1 1 0 0 1-.447.293L3 21l.586-4.293a1 1 0 0 1 .293-.447L15.879 3.707a1 1 0 0 1 0-1.414z"/></svg>    
+                            </button>
+                            <button class="bg-red-600 text-white py-1 px-3 rounded" wire:confirm @click="confirmDelete({{ $student->id }})">
+                                <svg class="w-4 h-4 mr-1" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 19c0 .552.448 1 1 1h10c.552 0 1-.448 1-1V7H6v12zm9-14V3H9v2H4v2h16V5h-5z"/></svg>
+                            </button>
                     </td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
-
     <div class="mt-6">
         {{ $students->links() }}
     </div>
 
-    <!-- Modal -->
     <div x-show="showModel" x-transition:enter="transform transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-10" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transform transition ease-in duration-300" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-10" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" @click.away="showModel = false">
         <div class="bg-white w-full max-w-md rounded-lg shadow-lg p-6">
             <div class="flex justify-between items-center mb-4">
@@ -82,16 +84,15 @@
                 </div>
                 <div class="flex justify-end items-center">
                     <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded">{{ $studentId ? 'Update' : 'Save' }}
-                        <div wire:loading class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-e-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+                        <div wire:loading wire:target="store" class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-e-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Toast Notification -->
     @if($showToast)
-    <div x-data="{ visible: true }" x-init="setTimeout(() => visible = false, 3000)" x-show="visible" x-transition.opacity.duration.1000ms id="toast-success" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800" role="alert">
+    <div x-data="{ visible: true }" x-init="setTimeout(() => visible = false, 3000)" x-show="visible" x-transition.opacity.duration.1000ms id="toast-success" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800">
         <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
             <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />

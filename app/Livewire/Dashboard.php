@@ -5,6 +5,7 @@ use App\Models\Student;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -16,7 +17,6 @@ class Dashboard extends Component
     public string $search = '';
     public string $name = '';
     public string $email = '';
-    public bool $showModel = false;
     public ?int $studentId = null; 
     public string $toastMessage = '';
     public bool $showToast =  false;
@@ -32,8 +32,6 @@ class Dashboard extends Component
         $this->name = $student->name;
 
         $this->email = $student->email;
-
-        $this->showModel = true;
     }
 
     public function rules() : array 
@@ -55,22 +53,18 @@ class Dashboard extends Component
 
         $this->toastMessage = $this->studentId ? 'Record updated successfully.' : 'Record added successfully.';
 
-        $this->reset(['showModel', 'name', 'email', 'studentId']);
-
         $this->dispatch('formSubmitted');
     }
 
     public function delete(int $id): void
     {
-        $this->reset('showToast', 'toastMessage');
-
-        $this->showToast = true;
-
-        $this->toastMessage = 'Record Deleted successfully.';
-
         $student = Student::findOrFail($id);
 
         $student->delete();
+
+        $this->showToast = true;
+
+        $this->toastMessage = 'Record deleted successfully.';
     }
 
     public function sortBy($column) : void
@@ -86,6 +80,7 @@ class Dashboard extends Component
     public function render() : View
     {
         $students = Student::query()
+            ->when($this->search, fn($query) => $query->where('name', 'like' , '%'.$this->search.'%'))
             ->orderBy($this->sortColumn, $this->sortDirection)
             ->paginate(10);
 
