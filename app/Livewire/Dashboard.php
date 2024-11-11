@@ -17,6 +17,7 @@ class Dashboard extends Component
     public string $email = '';
     public bool $showModel = false;
     public ?int $studentId = null; 
+    public string $toastMessage = '';
 
     public function edit(int $id): void 
     {
@@ -40,6 +41,8 @@ class Dashboard extends Component
                     $validatedData,
                 );
 
+        $this->toastMessage = $this->studentId ? 'Record updated successfully.' : 'Record added successfully.';
+        $this->dispatch('show-toast', ['message' => $this->toastMessage]);
         $this->reset(['showModel', 'name', 'email', 'studentId']);
     }
 

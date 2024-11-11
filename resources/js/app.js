@@ -1,3 +1,4 @@
+
 import 'bootstrap';
 import $ from 'jquery';
 window.$ = window.jQuery = $;
@@ -24,3 +25,16 @@ window.confirmDeletion = function(studentId) {
         }
     });
 }
+
+// document.addEventListener('DOMContentLoaded', function () {
+//     Livewire.on('show-toast', (message) => {
+//         // Show the toast and set the message
+//         window.toastVisible = true;
+//         window.toastMessage = message;
+
+//         // Hide the toast after 3 seconds
+//         setTimeout(() => {
+//             window.toastVisible = false;
+//         }, 3000);
+//     });
+// });

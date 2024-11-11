@@ -1,77 +1,91 @@
-<div class="container mt-5">
-    <h2 class="text-center mb-4">CRUD Operation</h2>
+<div class="container mx-auto mt-10">
+    <h2 class="text-center text-2xl font-semibold mb-6">CRUD Operation</h2>
 
-    <div class="row mb-3">
-        <div class="col-md-4">
-            <button type="button" wire:click="showModel=true" class="btn btn-primary mb-3">
-                Add New Record
-            </button>
-        </div>
-        <div class="col-md-8">
-            <input type="text" wire:model.live="search" class="form-control" placeholder="Search by name or email...">
-        </div>
+    <div class="flex flex-col md:flex-row md:justify-between items-center mb-6">
+        <button type="button" wire:click="showModel=true" class="bg-blue-600 text-white py-2 px-4 rounded mb-4 md:mb-0">
+            Add New Record
+        </button>
+        <input type="text" wire:model.live="search" class="w-full md:w-1/2 p-2 border border-gray-300 rounded" placeholder="Search by name or email...">
     </div>
 
-    
+    <div class="overflow-x-auto">
+        <table class="w-full table-auto border border-gray-300">
+            <thead class="bg-gray-800 text-white">
+                <tr>
+                    <th class="p-3 border border-gray-300">ID</th>
+                    <th class="p-3 border border-gray-300">Name</th>
+                    <th class="p-3 border border-gray-300">Email</th>
+                    <th class="p-3 border border-gray-300">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($students as $student)
+                    <tr class="bg-gray-100 text-center hover:bg-gray-200">
+                        <td class="p-3 border border-gray-300">{{ $student->id }}</td>
+                        <td class="p-3 border border-gray-300">{{ $student->name }}</td>
+                        <td class="p-3 border border-gray-300">{{ $student->email }}</td>
+                        <td class="p-3 border border-gray-300">
+                            <button class="bg-yellow-500 text-white py-1 px-3 rounded mr-2" wire:click="edit({{ $student->id }})">Edit</button>
+                            <button class="bg-red-600 text-white py-1 px-3 rounded" wire:confirm="Are you sure you want to delete?" wire:click="delete({{ $student->id }})">Delete</button>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 
-    <table class="table table-bordered table-hover">
-        <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($students as $student)
-            <tr>
-                <td>{{ $student->id }}</td>
-                <td>{{ $student->name }}</td>
-                <td>{{ $student->email }}</td>
-                <td>
-                    <button class="btn btn-warning btn-sm" wire:click="edit({{ $student->id }})">Edit</button>
-                    <button class="btn btn-danger btn-sm" wire:confirm="are u sure want to delete?" wire:click="delete({{ $student->id }})">Delete</button>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-    <div class="mt-3">
+    <div class="mt-6">
         {{ $students->links() }}
     </div>
 
-    <!-- Modal for Adding/Editing -->
-    <div wire:ignore.self class="modal fade" :class="$wire.showModel ? 'show' : ''" :style="$wire.showModel ? 'display:block' : 'display:none'" aria-hidden="{{ $showModel ? 'false' : 'true' }}" id="crudModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="crudModalLabel">{{ $studentId ? 'Edit Record' : 'Add Record' }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form wire:submit.prevent="store">
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Name</label>
-                            <input wire:model="name" type="text" class="form-control" id="name" placeholder="Enter name">
-                            @error('name')
-                                <span class="text-danger mt-2">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input wire:model="email" type="email" class="form-control" id="email" placeholder="Enter email">
-                            @error('email')
-                                <span class="text-danger mt-2">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        <button type="submit" class="btn btn-primary">{{ $studentId ? 'Update' : 'Save' }}</button>
-                        <div wire:loading> 
-                            Saving data...
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+    <div x-show="$wire.showModel" 
+    x-transition:enter="transform transition ease-out duration-300"
+    x-transition:enter-start="opacity-0 -translate-y-10"
+    x-transition:enter-end="opacity-100 translate-y-0"
+    x-transition:leave="transform transition ease-in duration-300"
+    x-transition:leave-start="opacity-100 translate-y-0"
+    x-transition:leave-end="opacity-0 -translate-y-10"
+    class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" 
+    wire:ignore.self>
+   
+   <div class="bg-white w-full max-w-md rounded-lg shadow-lg p-6">
+       <div class="flex justify-between items-center mb-4">
+           <h5 class="text-xl font-semibold">{{ $studentId ? 'Edit Record' : 'Add Record' }}</h5>
+           <button type="button" @click="$wire.showModel = false" class="text-gray-600 hover:text-gray-900">
+               &times;
+           </button>
+       </div>
+       <form wire:submit.prevent="store">
+           <div class="mb-4">
+               <label for="name" class="block text-gray-700 font-medium">Name</label>
+               <input wire:model="name" type="text" id="name" class="w-full mt-2 p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300" placeholder="Enter name">
+               @error('name')
+                   <span class="text-red-600 mt-2 text-sm">{{ $message }}</span>
+               @enderror
+           </div>
+           <div class="mb-4">
+               <label for="email" class="block text-gray-700 font-medium">Email</label>
+               <input wire:model="email" type="email" id="email" class="w-full mt-2 p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300" placeholder="Enter email">
+               @error('email')
+                   <span class="text-red-600 mt-2 text-sm">{{ $message }}</span>
+               @enderror
+           </div>
+           <div class="flex justify-end items-center">
+               <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded">{{ $studentId ? 'Update' : 'Save' }}</button>
+               <div wire:loading class="ml-4 text-gray-500">
+                   Saving data...
+               </div>
+           </div>
+       </form>
+   </div>
+</div>
+<div x-show="toastVisible" x-transition:enter="transition ease-in duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-4" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50">
+    <p>{{ $toastMessage }}</p>
+</div>
+<div x-data="{ toastVisible: false, toastMessage: '' }" x-init="$wire.on('show-toast', message => { toastVisible = true; toastMessage = message; })">
+    <!-- Toast Notification -->
+    <div x-show="toastVisible" x-transition:enter="transition ease-in duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-4" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50">
+        <p x-text="toastMessage"></p>
     </div>
+</div>  
 </div>
