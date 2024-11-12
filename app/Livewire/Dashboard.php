@@ -41,6 +41,7 @@ class Dashboard extends Component
             'email' => ['required', Rule::unique('students', 'email')->ignore($this->studentId)]
         ];
     }
+
     public function store(): void
     {
             Student::query()
@@ -52,6 +53,8 @@ class Dashboard extends Component
         $this->showToast = true;
 
         $this->toastMessage = $this->studentId ? 'Record updated successfully.' : 'Record added successfully.';
+
+        $this->reset('studentId', 'name', 'email');
 
         $this->dispatch('formSubmitted');
     }
