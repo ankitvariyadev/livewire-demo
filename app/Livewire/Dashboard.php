@@ -5,11 +5,13 @@ use App\Models\Student;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\On;
+use Livewire\Attributes\Locked;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 #[Layout('components.layouts.app')] 
+#[Title('crud operation')]
 class Dashboard extends Component
 {
     use WithPagination;
@@ -17,6 +19,7 @@ class Dashboard extends Component
     public string $search = '';
     public string $name = '';
     public string $email = '';
+    #[Locked]
     public ?int $studentId = null; 
     public string $toastMessage = '';
     public bool $showToast =  false;
@@ -44,11 +47,11 @@ class Dashboard extends Component
 
     public function store(): void
     {
-            Student::query()
-                ->updateOrCreate(
-                    ['id' => $this->studentId],
-                    $this->validate(),
-                );
+        Student::query()
+            ->updateOrCreate(
+                ['id' => $this->studentId],
+                $this->validate(),
+            );
         
         $this->showToast = true;
 
@@ -59,7 +62,7 @@ class Dashboard extends Component
         $this->dispatch('formSubmitted');
     }
 
-    public function delete(int $id): void
+    public function destroy(int $id): void
     {
         $student = Student::findOrFail($id);
 
