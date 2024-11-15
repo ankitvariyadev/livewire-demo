@@ -16,35 +16,37 @@
                     <th class="p-3 border border-gray-300 cursor-pointer" wire:click="sortBy('name')">
                         Name
                         @if ($sortColumn == 'name' && $sortDirection == 'asc')
-                            &#9650; 
+                        &#9650;
                         @else
-                            &#9660; 
+                        &#9660;
                         @endif
                     </th>
                     <th class="p-3 border border-gray-300 cursor-pointer" wire:click="sortBy('email')">
                         Email
                         @if ($sortColumn == 'email' && $sortDirection == 'asc')
-                            &#9650;
+                        &#9650;
                         @else
-                            &#9660;
+                        &#9660;
                         @endif
                     </th>
                     <th class="p-3 border border-gray-300" @click="showAction=true">Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody x-sort>
                 @foreach ($students as $student)
-                <tr wire:key="{{ $student->id }}" class="bg-gray-100 text-center hover:bg-gray-200">
+                <tr wire:key="{{ $student->id }}" class="bg-gray-100 text-center hover:bg-gray-200" x-sort:item>
                     <td class="p-3 border border-gray-300">{{ $student->id }}</td>
                     <td class="p-3 border border-gray-300">{{ $student->name }}</td>
                     <td class="p-3 border border-gray-300">{{ $student->email }}</td>
                     <td class="p-3 border border-gray-300">
-                            <button class="bg-blue-500 text-white py-1 px-3 rounded mr-2" @click="showModel = true; $wire.edit({{ $student->id }})">
-                                <svg class="w-4 h-4 mr-1" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12.293 3.707a1 1 0 0 1 1.414 0l5 5a1 1 0 0 1 0 1.414L7.707 19.707a1 1 0 0 1-.447.293L3 21l.586-4.293a1 1 0 0 1 .293-.447L15.879 3.707a1 1 0 0 1 0-1.414z"/></svg>    
-                            </button>
-                            <button class="bg-red-600 text-white py-1 px-3 rounded" wire:confirm wire:click="destroy({{ $student->id }})">
-                                <svg class="w-4 h-4 mr-1" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 19c0 .552.448 1 1 1h10c.552 0 1-.448 1-1V7H6v12zm9-14V3H9v2H4v2h16V5h-5z"/></svg>
-                            </button>
+                        <button class="bg-blue-500 text-white py-1 px-3 rounded mr-2" @click="showModel = true; $wire.edit({{ $student->id }})">
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path d="M12.293 3.707a1 1 0 0 1 1.414 0l5 5a1 1 0 0 1 0 1.414L7.707 19.707a1 1 0 0 1-.447.293L3 21l.586-4.293a1 1 0 0 1 .293-.447L15.879 3.707a1 1 0 0 1 0-1.414z" /></svg>
+                        </button>
+                        <button class="bg-red-600 text-white py-1 px-3 rounded" wire:confirm wire:click="destroy({{ $student->id }})">
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path d="M6 19c0 .552.448 1 1 1h10c.552 0 1-.448 1-1V7H6v12zm9-14V3H9v2H4v2h16V5h-5z" /></svg>
+                        </button>
                     </td>
                 </tr>
                 @endforeach
@@ -55,7 +57,16 @@
         {{ $students->links() }}
     </div>
 
-    <div x-show="showModel" x-transition:enter="transform transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-10" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transform transition ease-in duration-300" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-10" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" @click.away="showModel = false">
+    <div x-show="showModel" 
+            x-transition:enter="transform transition ease-out duration-300" 
+            x-transition:enter-start="opacity-0 -translate-y-10" 
+            x-transition:enter-end="opacity-100 translate-y-0" 
+            x-transition:leave="transform transition ease-in duration-300" 
+            x-transition:leave-start="opacity-100 translate-y-0" 
+            x-transition:leave-end="opacity-0 -translate-y-10" 
+            class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" 
+            @click.away="showModel = false"
+        >
         <div class="bg-white w-full max-w-md rounded-lg shadow-lg p-6">
             <div class="flex justify-between items-center mb-4">
                 <h5 class="text-xl font-semibold">{{ $studentId ? 'Edit Record' : 'Add Record' }}</h5>
@@ -87,43 +98,73 @@
         </div>
     </div>
 
-    <div x-show="showAction" x-transition:enter="transform transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-10" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transform transition ease-in duration-300" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-10" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" @click.away="showAction = false">
-        <div class="bg-white w-full max-w-md rounded-lg shadow-lg p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h5 class="text-xl font-semibold">select column</h5>
-                <button type="button" @click="showAction = false" class="text-gray-600 hover:text-gray-900">
-                    &times;
-                </button>
-            </div>
-            <form action="">
-                <div class="mb-4">
-                    <label for="name" class="block text-gray-700 font-medium">Name</label>
-                    <input type="checkbox" value="red" x-model="colors">
-                    <input type="checkbox" value="orange" x-model="colors">
-                    <input type="checkbox" value="yellow" x-model="colors">
-                    @error('name')
-                    <span class="text-red-500 mt-2 text-sm">{{ $message }}</span>
-                    @enderror
+    <div x-data="{ 
+        showAction: false, 
+        checkedList: $wire.entangle('selectedColumns'),
+        uncheckedList: [],   
+        toggleOption(option) { 
+            if (this.uncheckedList.includes(option)) {
+                this.checkedList.push(option);
+                this.uncheckedList = this.uncheckedList.filter(item => item !== option);
+            } else {
+                this.uncheckedList.push(option);
+                this.checkedList = this.checkedList.filter(item => item !== option);
+            }
+        } 
+    }">
+        <button @click="showAction = true" class="bg-blue-600 text-white py-2 px-4 rounded">Open Modal</button>
+
+        <div x-show="showAction" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.away="showAction = false">
+            <div class="bg-white w-full max-w-md p-6 rounded shadow-lg">
+                <h2 class="text-xl font-semibold mb-4">Checkbox Group</h2>
+
+                <div class="mt-4">
+                    <h3 class="text-lg font-semibold mb-2">Checked List</h3>
+                    <ul x-sort>
+                        <template x-for="option in checkedList" :key="option">
+                            <li class="flex items-center mb-2 bg-green-100 p-2 rounded" x-sort:item>
+                                <input type="checkbox" :value="option" checked @change="toggleOption(option)" class="mr-2" />
+                                <span x-text="option"></span>
+                            </li>
+                        </template>
+                    </ul>
                 </div>
-            </form>
+
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">Unchecked List</h3>
+                    <ul x-sort>
+                        <template x-for="option in uncheckedList" :key="option">
+                            <li class="flex items-center mb-2 bg-green-100 p-2 rounded" x-sort:item>
+                                <input type="checkbox" :value="option" @change="toggleOption(option)" class="mr-2" />
+                                <span x-text="option"></span>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
+
+                <div class="mt-4 flex justify-end">
+                    <button @click="showAction = false" class="bg-red-500 text-white py-2 px-4 rounded">Close</button>
+                    <button @click="showAction = false; $wire.saveColumnSelection()" class="bg-blue-500 text-white py-2 px-4 rounded ml-2">Save</button>
+                </div>
+            </div>
         </div>
     </div>
 
     @if($showToast)
-        <div x-data="{ visible: true }" x-init="setTimeout(() => visible = false, 3000)" x-show="visible" x-transition.opacity.duration.1000ms id="toast-success" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800">
-            <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
-                <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
-                </svg>
-                <span class="sr-only">Check icon</span>
-            </div>
-            <div class="ms-3 text-sm font-normal">{{ $toastMessage }}</div>
-            <button type="button" @click="visible = false" class="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700" aria-label="Close">
-                <span class="sr-only">Close</span>
-                <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-                </svg>
-            </button>
+    <div x-data="{ visible: true }" x-init="setTimeout(() => visible = false, 3000)" x-show="visible" x-transition.opacity.duration.1000ms id="toast-success" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800">
+        <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
+            <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+            </svg>
+            <span class="sr-only">Check icon</span>
         </div>
+        <div class="ms-3 text-sm font-normal">{{ $toastMessage }}</div>
+        <button type="button" @click="visible = false" class="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700" aria-label="Close">
+            <span class="sr-only">Close</span>
+            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+            </svg>
+        </button>
+    </div>
     @endif
 </div>
