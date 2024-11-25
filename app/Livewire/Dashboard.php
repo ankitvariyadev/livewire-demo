@@ -32,7 +32,7 @@ class Dashboard extends Component
     public array $selectedColumns = ['id', 'name', 'email']; 
     public array $unselectedColumns = []; 
 
-    public function mount()
+    public function mount(): void
     {
         $cachedColumns = Cache::get('selected_columns');
         if($cachedColumns){
@@ -44,7 +44,7 @@ class Dashboard extends Component
         }
     }
 
-    public function saveColumnSelection()
+    public function saveColumnSelection(): void
     {
         $this->unselectedColumns = array_diff($this->columns, $this->selectedColumns);
 
@@ -76,8 +76,8 @@ class Dashboard extends Component
             ['id' => $this->studentId],
             $this->validate()
         );
-
-        Toaster::success($this->studentId ? "Record Updated Successfully." : "Record Added Successfully");
+        
+        Toaster::success($this->studentId ? "Record Updated Successfully." : "Record Deleted Successfully.");
 
         $this->reset('studentId', 'name', 'email');
 
