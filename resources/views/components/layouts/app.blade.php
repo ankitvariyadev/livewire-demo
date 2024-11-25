@@ -10,5 +10,6 @@
     <div class="min-h-screen flex flex-col items-center">
         {{ $slot }}
     </div>
+    <x-toaster-hub /> 
 </body>
 </html>

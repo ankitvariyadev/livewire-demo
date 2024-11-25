@@ -4,7 +4,6 @@ namespace App\Livewire;
 
 use App\Models\Student;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
@@ -12,6 +11,7 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Masmerise\Toaster\Toaster;
 
 #[Layout('components.layouts.app')]
 #[Title('CRUD Operation')]
@@ -24,8 +24,6 @@ class Dashboard extends Component
     public string $email = '';
     #[Locked]
     public ?int $studentId = null;
-    public string $toastMessage = '';
-    public bool $showToast = false;
 
     public string $sortColumn = 'name';
     public string $sortDirection = 'asc';
@@ -79,9 +77,7 @@ class Dashboard extends Component
             $this->validate()
         );
 
-        $this->showToast = true;
-
-        $this->toastMessage = $this->studentId ? 'Record updated successfully.' : 'Record added successfully.';
+        Toaster::success($this->studentId ? "Record Updated Successfully." : "Record Added Successfully");
 
         $this->reset('studentId', 'name', 'email');
 
@@ -92,9 +88,7 @@ class Dashboard extends Component
     {
         $student->delete();
 
-        $this->showToast = true;
-
-        $this->toastMessage = 'Record deleted successfully.';
+        Toaster::success("record deleted successfully");
     }
 
     public function sortBy(string $column): void
@@ -109,17 +103,16 @@ class Dashboard extends Component
 
     public function render(): View
     {
-        $columnsToSelect = filled($this->selectedColumns) ? $this->selectedColumns : ['id', 'name', 'email'];
+        $this->selectedColumns = filled($this->selectedColumns) ? $this->selectedColumns : ['id', 'name', 'email'];
 
         $students = Student::query()
-            ->select($columnsToSelect) 
+            ->select($this->selectedColumns) 
             ->when($this->search, fn ($query) => $query->where('name', 'like', '%' . $this->search . '%'))
             ->orderBy($this->sortColumn, $this->sortDirection)
             ->paginate(10);
 
             return view('livewire.dashboard', [
                 'students' => $students,
-                'selectedColumns' => $this->selectedColumns,
             ]);
     }
 }
