@@ -1,51 +1,46 @@
-<div class="container mx-auto mt-10" x-data="{ showModel: false, showAction: false }" x-init=" @this.on('formSubmitted', () => showModel = false)">
+<div class="container mx-auto mt-10" x-data="{ showModel: false, show: false }" x-init=" @this.on('formSubmitted', () => showModel = false)">
     <h2 class="text-center text-2xl font-semibold mb-6">CRUD Operation</h2>
 
     <div class="flex flex-col md:flex-row md:justify-between items-center mb-6">
         <button type="button" @click="showModel = true" class="bg-blue-600 text-white py-2 px-4 rounded mb-4 md:mb-0">
             Add New Record
         </button>
+        <button @click="$dispatch('toggle-modal', { show: true })" class="bg-blue-600 text-white py-2 px-4 rounded mb-4 md:mb-0">Select Columns</button>
         <input type="text" wire:model.live="search" class="w-full md:w-1/2 p-2 border border-gray-300 rounded" placeholder="Search by name or email...">
     </div>
 
     <div class="overflow-x-auto">
         <table class="w-full table-auto border border-gray-300">
-            <thead class="bg-gray-800 text-white">
-                <tr>
-                    <th class="p-3 border border-gray-300">ID</th>
-                    <th class="p-3 border border-gray-300 cursor-pointer" wire:click="sortBy('name')">
-                        Name
-                        @if ($sortColumn == 'name' && $sortDirection == 'asc')
-                        &#9650;
-                        @else
-                        &#9660;
-                        @endif
-                    </th>
-                    <th class="p-3 border border-gray-300 cursor-pointer" wire:click="sortBy('email')">
-                        Email
-                        @if ($sortColumn == 'email' && $sortDirection == 'asc')
-                        &#9650;
-                        @else
-                        &#9660;
-                        @endif
-                    </th>
-                    <th class="p-3 border border-gray-300" @click="showAction=true">Actions</th>
-                </tr>
+            <thead class="bg-gray-800 text-white text-center">
+            <tr>
+                @foreach($selectedColumns as $column)
+                    <th class="p-3 border border-gray-300">{{ $column }}</th>
+                @endforeach
+                <th class="p-3 border border-gray-300" @click="show=true">Actions</th>
+            </tr>
             </thead>
             <tbody x-sort>
                 @foreach ($students as $student)
                 <tr wire:key="{{ $student->id }}" class="bg-gray-100 text-center hover:bg-gray-200" x-sort:item>
-                    <td class="p-3 border border-gray-300">{{ $student->id }}</td>
-                    <td class="p-3 border border-gray-300">{{ $student->name }}</td>
-                    <td class="p-3 border border-gray-300">{{ $student->email }}</td>
+                    @if($student->id)
+                        <td class="p-3 border border-gray-300">{{ $student->id }}</td>
+                    @endif
+                    @if($student->name)
+                        <td class="p-3 border border-gray-300">{{ $student->name }}</td>
+                    @endif
+                    @if($student->email)
+                        <td class="p-3 border border-gray-300">{{ $student->email }}</td>
+                    @endif
                     <td class="p-3 border border-gray-300">
                         <button class="bg-blue-500 text-white py-1 px-3 rounded mr-2" @click="showModel = true; $wire.edit({{ $student->id }})">
                             <svg class="w-4 h-4 mr-1" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                <path d="M12.293 3.707a1 1 0 0 1 1.414 0l5 5a1 1 0 0 1 0 1.414L7.707 19.707a1 1 0 0 1-.447.293L3 21l.586-4.293a1 1 0 0 1 .293-.447L15.879 3.707a1 1 0 0 1 0-1.414z" /></svg>
+                                <path d="M12.293 3.707a1 1 0 0 1 1.414 0l5 5a1 1 0 0 1 0 1.414L7.707 19.707a1 1 0 0 1-.447.293L3 21l.586-4.293a1 1 0 0 1 .293-.447L15.879 3.707a1 1 0 0 1 0-1.414z" />
+                            </svg>
                         </button>
                         <button class="bg-red-600 text-white py-1 px-3 rounded" wire:confirm wire:click="destroy({{ $student->id }})">
                             <svg class="w-4 h-4 mr-1" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                <path d="M6 19c0 .552.448 1 1 1h10c.552 0 1-.448 1-1V7H6v12zm9-14V3H9v2H4v2h16V5h-5z" /></svg>
+                                <path d="M6 19c0 .552.448 1 1 1h10c.552 0 1-.448 1-1V7H6v12zm9-14V3H9v2H4v2h16V5h-5z" />
+                            </svg>
                         </button>
                     </td>
                 </tr>
@@ -57,16 +52,7 @@
         {{ $students->links() }}
     </div>
 
-    <div x-show="showModel" 
-            x-transition:enter="transform transition ease-out duration-300" 
-            x-transition:enter-start="opacity-0 -translate-y-10" 
-            x-transition:enter-end="opacity-100 translate-y-0" 
-            x-transition:leave="transform transition ease-in duration-300" 
-            x-transition:leave-start="opacity-100 translate-y-0" 
-            x-transition:leave-end="opacity-0 -translate-y-10" 
-            class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" 
-            @click.away="showModel = false"
-        >
+    <div x-show="showModel" x-transition:enter="transform transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-10" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transform transition ease-in duration-300" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-10" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" @click.away="showModel = false">
         <div class="bg-white w-full max-w-md rounded-lg shadow-lg p-6">
             <div class="flex justify-between items-center mb-4">
                 <h5 class="text-xl font-semibold">{{ $studentId ? 'Edit Record' : 'Add Record' }}</h5>
@@ -99,53 +85,51 @@
     </div>
 
     <div x-data="{ 
-        showAction: false, 
-        checkedList: $wire.entangle('selectedColumns'),
-        uncheckedList: [],   
-        toggleOption(option) { 
-            if (this.uncheckedList.includes(option)) {
-                this.checkedList.push(option);
-                this.uncheckedList = this.uncheckedList.filter(item => item !== option);
+        selectedColumns: @entangle('selectedColumns'), 
+        unselectedColumns: @entangle('unselectedColumns'), 
+        toggleColumn(column) {
+            if (this.selectedColumns.includes(column)) {
+                this.selectedColumns = this.selectedColumns.filter(c => c !== column);
+                this.unselectedColumns.push(column);
             } else {
-                this.uncheckedList.push(option);
-                this.checkedList = this.checkedList.filter(item => item !== option);
+                this.unselectedColumns = this.unselectedColumns.filter(c => c !== column);
+                this.selectedColumns.push(column);
             }
         } 
     }">
-        <button @click="showAction = true" class="bg-blue-600 text-white py-2 px-4 rounded">Open Modal</button>
-
-        <div x-show="showAction" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.away="showAction = false">
-            <div class="bg-white w-full max-w-md p-6 rounded shadow-lg">
-                <h2 class="text-xl font-semibold mb-4">Checkbox Group</h2>
-
-                <div class="mt-4">
-                    <h3 class="text-lg font-semibold mb-2">Checked List</h3>
-                    <ul x-sort>
-                        <template x-for="option in checkedList" :key="option">
-                            <li class="flex items-center mb-2 bg-green-100 p-2 rounded" x-sort:item>
-                                <input type="checkbox" :value="option" checked @change="toggleOption(option)" class="mr-2" />
-                                <span x-text="option"></span>
-                            </li>
-                        </template>
-                    </ul>
-                </div>
-
+    <!-- Column Selection Modal -->
+    <div x-data="{ show: false }" x-on:toggle-modal.window="show = $event.detail.show" x-show="show" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Select Columns</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Checked List -->
                 <div>
-                    <h3 class="text-lg font-semibold mb-2">Unchecked List</h3>
-                    <ul x-sort>
-                        <template x-for="option in uncheckedList" :key="option">
-                            <li class="flex items-center mb-2 bg-green-100 p-2 rounded" x-sort:item>
-                                <input type="checkbox" :value="option" @change="toggleOption(option)" class="mr-2" />
-                                <span x-text="option"></span>
+                    <h3 class="font-medium mb-2">Selected Columns</h3>
+                    <ul>
+                        <template x-for="column in selectedColumns" :key="column">
+                            <li class="flex items-center mb-2">
+                                <input type="checkbox" :value="column" checked @change="toggleColumn(column)" class="mr-2">
+                                <span x-text="column"></span>
                             </li>
                         </template>
                     </ul>
                 </div>
-
-                <div class="mt-4 flex justify-end">
-                    <button @click="showAction = false" class="bg-red-500 text-white py-2 px-4 rounded">Close</button>
-                    <button @click="showAction = false; $wire.saveColumnSelection()" class="bg-blue-500 text-white py-2 px-4 rounded ml-2">Save</button>
+                <!-- Unchecked List -->
+                <div>
+                    <h3 class="font-medium mb-2">Unselected Columns</h3>
+                    <ul>
+                        <template x-for="column in unselectedColumns" :key="column">
+                            <li class="flex items-center mb-2">
+                                <input type="checkbox" :value="column" @change="toggleColumn(column)" class="mr-2">
+                                <span x-text="column"></span>
+                            </li>
+                        </template>
+                    </ul>
                 </div>
+            </div>
+            <div class="flex justify-end mt-4">
+                <button @click="$dispatch('toggle-modal', { show: false })" class="bg-red-500 text-white px-4 py-2 rounded">Close</button>
+                <button @click="$dispatch('toggle-modal', { show: false }); $wire.saveColumnSelection()" class="bg-blue-500 text-white px-4 py-2 rounded ml-2">Save</button>
             </div>
         </div>
     </div>
