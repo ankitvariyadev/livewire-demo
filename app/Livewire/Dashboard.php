@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Student;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -29,32 +30,35 @@ class Dashboard extends Component
     public string $sortColumn = 'name';
     public string $sortDirection = 'asc';
 
-    public array $columns = []; // All columns from the database
-    public array $selectedColumns = []; // Checked columns
-    public array $unselectedColumns = []; // Unchecked columns
+    public array $columns = ['id', 'name', 'email']; 
+    public array $selectedColumns = ['id', 'name', 'email']; 
+    public array $unselectedColumns = []; 
 
     public function mount()
     {
-        $this->columns = Schema::getColumnListing('students');
-        $specificColumns = array_filter($this->columns, function ($column) {
-            return in_array($column, ['id', 'name', 'email']); 
-        });
-        $this->selectedColumns = $specificColumns; 
-        $this->unselectedColumns = []; 
+        $cachedColumns = Cache::get('selected_columns');
+        if($cachedColumns){
+            $this->selectedColumns = $cachedColumns;
+            $this->unselectedColumns = array_diff($this->columns, $this->selectedColumns);
+        }else{
+            $this->selectedColumns = ['id', 'name', 'email'];
+            $this->unselectedColumns = [];
+        }
     }
 
     public function saveColumnSelection()
     {
         $this->unselectedColumns = array_diff($this->columns, $this->selectedColumns);
-        $this->selectedColumns = array_values($this->selectedColumns);
-        $this->unselectedColumns = array_values($this->unselectedColumns);
 
-        $this->dispatch('columnsUpdated'); 
+        $this->selectedColumns = array_values($this->selectedColumns);
+
+        $this->unselectedColumns = array_values($this->unselectedColumns);
+        
+        Cache::put('selected_columns', $this->selectedColumns, now()->addDays(1));
     }
 
-    public function edit(int $id): void
+    public function edit(Student $student): void
     {
-        $student = Student::query()->findOrFail($id);
         $this->studentId = $student->id;
         $this->name = $student->name;
         $this->email = $student->email;
@@ -76,18 +80,20 @@ class Dashboard extends Component
         );
 
         $this->showToast = true;
+
         $this->toastMessage = $this->studentId ? 'Record updated successfully.' : 'Record added successfully.';
 
         $this->reset('studentId', 'name', 'email');
+
         $this->dispatch('formSubmitted');
     }
 
-    public function destroy(int $id): void
+    public function destroy(Student $student): void
     {
-        $student = Student::findOrFail($id);
         $student->delete();
 
         $this->showToast = true;
+
         $this->toastMessage = 'Record deleted successfully.';
     }
 
@@ -103,8 +109,10 @@ class Dashboard extends Component
 
     public function render(): View
     {
+        $columnsToSelect = filled($this->selectedColumns) ? $this->selectedColumns : ['id', 'name', 'email'];
+
         $students = Student::query()
-            ->select($this->selectedColumns) 
+            ->select($columnsToSelect) 
             ->when($this->search, fn ($query) => $query->where('name', 'like', '%' . $this->search . '%'))
             ->orderBy($this->sortColumn, $this->sortDirection)
             ->paginate(10);
