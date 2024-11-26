@@ -27,6 +27,7 @@ class Dashboard extends Component
 
     public string $sortColumn = 'name';
     public string $sortDirection = 'asc';
+    public array $student = [];
 
     public array $columns = ['id', 'name', 'email']; 
     public array $selectedColumns = ['id', 'name', 'email']; 
@@ -111,6 +112,7 @@ class Dashboard extends Component
             ->orderBy($this->sortColumn, $this->sortDirection)
             ->paginate(10);
 
+        $this->student = $students->getCollection()->toArray();
             return view('livewire.dashboard', [
                 'students' => $students,
             ]);

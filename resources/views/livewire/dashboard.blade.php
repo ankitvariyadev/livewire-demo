@@ -1,4 +1,11 @@
-<div class="container mx-auto mt-10" x-data="{ showSelection: false, showModel: false, show: false }" x-init=" @this.on('formSubmitted', () => showModel = false)">
+<div class="container mx-auto mt-10" 
+    x-data="{
+            selectionHandler : null,
+            showSelection: false,
+            showModel: false, 
+            show: false 
+        }" 
+    x-init="@this.on('formSubmitted', () => showModel = false);">
     <h2 class="text-center text-2xl font-semibold mb-6">CRUD Operation</h2>
 
     <div class="flex flex-col md:flex-row md:justify-between items-center mb-6">
@@ -17,7 +24,7 @@
             <thead class="bg-gray-800 text-white text-center">
                 <tr>
                     @foreach($selectedColumns as $column)
-                    <th class="p-3 border border-gray-300" @click="$wire.sortBy({{ $column }})">{{ $column }}</th>
+                    <th class="p-3 border border-gray-300" @click="$wire.sortBy($column)">{{ $column }}</th>
                     @endforeach
                     <th class="p-3 border border-gray-300" @click="show=true">Actions</th>
                 </tr>
@@ -137,35 +144,54 @@
             </div>
         </div>
         <!-- modal for section box  -->
-        <div x-show="showSelection" x-transition:enter="transform transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-10" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transform transition ease-in duration-300" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-10" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" @click.away="showModel = false">
-            <div class="bg-white w-full max-w-md rounded-lg shadow-lg p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h5 class="text-xl font-semibold">selection box</h5>
-                    <button type="button" @click="showSelection = false" class="text-gray-600 hover:text-gray-900">
-                        &times;
-                    </button>
-                </div>
-                <div class="my-2" x-data="{ selected: {} }">
-                    @foreach ($students as $key => $student)
-                        <div class="mb-4">
-                            <label class="block text-gray-700 font-medium">Select Student</label>
-                            <select 
-                                x-model="selected[{{ $key }}]"
-                                class="w-full mt-2 p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300"
-                            >
-                                <option value="">Select student</option>
-                                @foreach ($students as $s)
-                                    <option 
-                                        value="{{ $s->id }}" 
-                                        x-show="!Object.values(selected).includes('{{ $s->id }}') || selected[{{ $key }}] === '{{ $s->id }}'"
-                                    >
-                                        {{ $s->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    @endforeach
-                </div>
+        <div 
+        x-show="showSelection" 
+        x-transition:enter="transform transition ease-out duration-300" 
+        x-transition:enter-start="opacity-0 -translate-y-10" 
+        x-transition:enter-end="opacity-100 translate-y-0" 
+        x-transition:leave="transform transition ease-in duration-300" 
+        x-transition:leave-start="opacity-100 translate-y-0" 
+        x-transition:leave-end="opacity-0 -translate-y-10" 
+        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" 
+        @click.away="showSelection = false"
+    >
+        <div class="bg-white w-full max-w-md rounded-lg shadow-lg p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h5 class="text-xl font-semibold">Selection Box</h5>
+                <button type="button" @click="showSelection = false" class="text-gray-600 hover:text-gray-900">
+                    &times;
+                </button>
+            </div>
+            <div class="my-2" x-data="{ selected: {} }">
+                <template x-for="(student, index) in $store.student ?? $wire.student" :key="student.id">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-medium">Select Student</label>
+                        <select 
+                            x-model="selected[student.id]"
+                            class="w-full mt-2 p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300"
+                        >
+                            <option value="">Select student</option>
+                            <template x-for="s in $store.student ?? $wire.student" :key="s.id">
+                                <option 
+                                    :value="s.id" 
+                                    x-show="!Object.values(selected).includes(s.id) || selected[s.id] === s.id"
+                                    x-text="s.name"
+                                ></option>
+                            </template>
+                        </select>
+                    </div>
+                </template>
             </div>
         </div>
     </div>
+</div>
+@script
+    <script>
+        Alpine.data('selectionHandler' () => ({
+            init() {
+                Alpine.store('students' => this.$wire.student);
+            }
+        }));
+    </script>
+@endscript
+</div>
