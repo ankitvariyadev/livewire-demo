@@ -145,23 +145,26 @@
                         &times;
                     </button>
                 </div>
-                <div class="mb-4">
-                    <label for="select1" class="block text-gray-700 font-medium">select 1</label>
-                    <select class="w-full mt-2 p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300" name="select" id="select1">
-                        <option value="">select name</option>
-                    </select>
-                </div>
-                <div class="mb-4">
-                    <label for="select2" class="block text-gray-700 font-medium">select 2</label>
-                    <select class="w-full mt-2 p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300" name="select" id="select2">
-                        <option value="">select name</option>
-                    </select>
-                </div>
-                <div class="mb-4">
-                    <label for="select3" class="block text-gray-700 font-medium">select 3</label>
-                    <select class="w-full mt-2 p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300" name="select" id="select3">
-                        <option value="">select name</option>
-                    </select>
+                <div class="my-2" x-data="{ selected: {} }">
+                    @foreach ($students as $key => $student)
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium">Select Student</label>
+                            <select 
+                                x-model="selected[{{ $key }}]"
+                                class="w-full mt-2 p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300"
+                            >
+                                <option value="">Select student</option>
+                                @foreach ($students as $s)
+                                    <option 
+                                        value="{{ $s->id }}" 
+                                        x-show="!Object.values(selected).includes('{{ $s->id }}') || selected[{{ $key }}] === '{{ $s->id }}'"
+                                    >
+                                        {{ $s->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endforeach
                 </div>
             </div>
         </div>
